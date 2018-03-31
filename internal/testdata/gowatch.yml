@@ -1,0 +1,10 @@
+excluded_regexps:
+- .gitignore$
+- .yml$
+- .txt$
+exter_paths:
+- /home/demo
+excluded_paths:
+- vendor
+envs:
+- DEMO=demo

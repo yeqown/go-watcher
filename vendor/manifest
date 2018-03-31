@@ -1,0 +1,29 @@
+{
+	"version": 0,
+	"dependencies": [
+		{
+			"importpath": "github.com/howeyc/fsnotify",
+			"repository": "https://github.com/howeyc/fsnotify",
+			"vcs": "git",
+			"revision": "f0c08ee9c60704c1879025f2ae0ff3e000082c13",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/silenceper/log",
+			"repository": "https://github.com/silenceper/log",
+			"vcs": "git",
+			"revision": "e5ac7fa8a76a863e90c8b624d5c2d4cab8e48394",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "gopkg.in/yaml.v1",
+			"repository": "https://gopkg.in/yaml.v1",
+			"vcs": "git",
+			"revision": "9f9df34309c04878acc86042b16630b0f696e1de",
+			"branch": "v1",
+			"notests": true
+		}
+	]
+}

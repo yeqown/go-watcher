@@ -1,0 +1,19 @@
+# gowatch.yml
+
+# 需要监听的除当前目录以外的目录
+extern_paths:
+
+# 需要排除的文件表达式
+excluded_regexps:
+  - ".yml$"
+  - ".txt$"
+
+# 热加载命令的环境变量
+envs:
+  - GOOS=linux
+  - GOPATH=/Users/yeqiang/go
+
+# 当前目录下需要排除的文件夹
+excluded_paths:
+  - vendor
+  - testdata
