@@ -1,7 +1,8 @@
 /*
- * 执行者
+ * dor.go
+ * process op, start, kill, restart, new
  */
-package internal
+package _internal
 
 import (
 	"github.com/silenceper/log"
@@ -21,6 +22,7 @@ var (
 	storeCmdName = ""
 )
 
+// new one process
 func newCommand(cmdName string, cmdArgs, cmdEnvs []string) *exec.Cmd {
 	cmd := exec.Command(cmdName, cmdArgs...)
 	cmd.Stdout = os.Stdout
@@ -29,6 +31,7 @@ func newCommand(cmdName string, cmdArgs, cmdEnvs []string) *exec.Cmd {
 	return cmd
 }
 
+// kill one process
 func kill(cmd *exec.Cmd) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -44,11 +47,13 @@ func kill(cmd *exec.Cmd) {
 	return
 }
 
+// run a command
 func start(cmd *exec.Cmd) {
 	log.Info("Command Calling")
 	go cmd.Run()
 }
 
+// final command will be like: "gowatch run ls -l"
 // cmdArgs format: "", cmdEnv format: "GOOS=linux"
 func InitDor(cmdName string, cmdArgs, cmdEnvs []string) {
 	// store
@@ -61,6 +66,9 @@ func InitDor(cmdName string, cmdArgs, cmdEnvs []string) {
 	start(cmd)
 }
 
+// hotReload one command
+// if process has been killed, so renew one command
+// else reStart it
 func hotReload() {
 	if !cmd.ProcessState.Exited() {
 		kill(cmd)

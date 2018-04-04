@@ -1,14 +1,13 @@
 /*
- * 文件监视
+ * file watcher
  */
-package internal
+package _internal
 
 import (
 	"time"
 
 	"github.com/howeyc/fsnotify"
 	"github.com/silenceper/log"
-	// "os/exec"
 )
 
 var (
@@ -17,7 +16,8 @@ var (
 	secDuration   = 1 * time.Second
 )
 
-// pack init
+// init to do some initialize work
+// evtTime
 func init() {
 	evtTime = map[string]int64{}
 }

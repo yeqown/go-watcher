@@ -1,5 +1,4 @@
-// // package gowatch
-package internal
+package _internal
 
 import (
 	"testing"

@@ -2,7 +2,7 @@
  * util functions
  */
 
-package internal
+package _internal
 
 import (
 	"io/ioutil"
@@ -98,6 +98,7 @@ func AppendWatchFiletypes(names ...string) {
 	WatchFiletypes = append(WatchFiletypes, names...)
 }
 
+// 增加不需要监视的正则匹配表达式
 func AppendUnWatchRegexps(exps ...string) {
 	UnWatchRegExps = append(UnWatchRegExps, exps...)
 }
@@ -130,7 +131,7 @@ func WalkDirectoryRecursive(dir string, excluedPaths []string, paths *[]string) 
 
 }
 
-// time
+// 计算时间戳的间隔
 func UnixTimeDuration(t1, t2 int64) time.Duration {
 	tt1 := time.Unix(t1, 0)
 	tt2 := time.Unix(t2, 0)

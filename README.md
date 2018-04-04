@@ -7,7 +7,8 @@ Go 程序热重载工具，提升开发效率
 ### 安装使用
 
 ```go
-go get github.com/yeqown/gowatch
+go get github.com/yeqown/gowatch 
+go install github.com/yeqown/gowatch
 ```
 
 ### 命令行

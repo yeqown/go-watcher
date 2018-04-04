@@ -12,7 +12,7 @@ import (
 	"syscall"
 	"time"
 
-	. "gowatch/internal"
+	. "gowatch/_internal"
 
 	"github.com/silenceper/log"
 )
