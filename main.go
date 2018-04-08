@@ -61,7 +61,10 @@ func parseCommand() error {
 			cmdArgs = args[2:]
 		}
 	case "init":
+		// 输出到文件之后，结束程序
+		log.Info("GoWactch Exit!")
 		OutputDefaultConf("./gowatch.yml")
+		os.Exit(2)
 	default:
 		flag.Usage()
 		return SubCommandErr
@@ -95,7 +98,10 @@ func main() {
 	StartWatch(w, paths, exit)
 
 	// set dor
-	fmt.Println(cmdName, cmdArgs)
+	// load $PATH envs form lcoal
+	PATH := os.Getenv("path")
+	cfg.Envs = append(cfg.Envs, fmt.Sprintf("%s=%s", "PATH", PATH))
+	// fmt.Println(cmdName, cmdArgs)
 	InitDor(cmdName, cmdArgs, cfg.Envs)
 
 	// handle os signal
@@ -112,6 +118,7 @@ func main() {
 	}
 }
 
+// handle os signal
 func HdlSignal() {
 	sig := make(chan os.Signal)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGHUP)
