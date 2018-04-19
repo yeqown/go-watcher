@@ -6,7 +6,7 @@ package main
 import (
 	"errors"
 	"flag"
-	"fmt"
+	// "fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -98,10 +98,6 @@ func main() {
 	StartWatch(w, paths, exit)
 
 	// set dor
-	// load $PATH envs form lcoal
-	PATH := os.Getenv("path")
-	cfg.Envs = append(cfg.Envs, fmt.Sprintf("%s=%s", "PATH", PATH))
-	// fmt.Println(cmdName, cmdArgs)
 	InitDor(cmdName, cmdArgs, cfg.Envs)
 
 	// handle os signal
@@ -112,6 +108,7 @@ func main() {
 		select {
 		case <-exit:
 			log.Info("GoWactch Exit!")
+			Exit()
 			os.Exit(2)
 		}
 		time.Sleep(3 * time.Second)
