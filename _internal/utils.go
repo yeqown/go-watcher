@@ -48,10 +48,12 @@ func checkPathExcluded(fpath string, excluedPaths []string) bool {
 		absPath  string
 		absFPath string
 	)
+	// 获取绝对路径
+	if absFPath, err = filepath.Abs(fpath); err != nil {
+		return false
+	}
+
 	for _, exclPath := range excluedPaths {
-		if absFPath, err = filepath.Abs(fpath); err != nil {
-			break
-		}
 		// 文件夹名字 和 排除名字一致
 		if fpath == exclPath || absFPath == exclPath {
 			return true
@@ -120,7 +122,7 @@ func WalkDirectoryRecursive(dir string, excluedPaths []string, paths *[]string) 
 	for _, finfo := range fInfos {
 		tmpDir := filepath.Join(dir, finfo.Name())
 
-		if finfo.IsDir() && checkPathExcluded(finfo.Name(), excluedPaths) {
+		if finfo.IsDir() && checkPathExcluded(tmpDir, excluedPaths) {
 			continue
 		}
 		if finfo.IsDir() && finfo.Name()[0] != '.' {
