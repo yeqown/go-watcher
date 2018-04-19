@@ -51,7 +51,7 @@ func StartWatch(w *fsnotify.Watcher, paths []string, exit chan bool) {
 					continue
 				}
 
-				log.Infof("Changed: [%s]", evt.Name)
+				log.Infof("[%10s] changed", evt.Name)
 				evtTime[evt.Name] = mt
 
 				// hotReload
