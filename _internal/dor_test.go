@@ -5,10 +5,8 @@ import (
 )
 
 func Test_Dor(t *testing.T) {
-	args := []string{
-		"-l",
-	}
-	cmd := newCommand("ls", args, EmptyEnvs)
+	args := []string{"-l"}
+	cmd := newCommand("ls", args, []string{})
 
 	// start
 	start(cmd)

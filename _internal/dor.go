@@ -7,31 +7,34 @@ package _internal
 import (
 	"github.com/silenceper/log"
 
-	// "io"
+	"fmt"
 	"os"
 	"os/exec"
+	"syscall"
+	// "time"
 )
 
 var (
-	cmd       *exec.Cmd = nil        // default cmd varible
-	EmptyArgs           = []string{} // default empty args
-	EmptyEnvs           = []string{} // default empty envs
-
+	// EmptyArgs           = []string{} // default empty args
+	// EmptyEnvs           = []string{} // default empty envs
+	cmd          *exec.Cmd = nil // default cmd varible
+	exitC        chan bool
 	storeCmdArgs = []string{}
 	storeCmdEnvs = []string{}
 	storeCmdName = ""
 )
 
-// new one process
 func newCommand(cmdName string, cmdArgs, cmdEnvs []string) *exec.Cmd {
 	cmd := exec.Command(cmdName, cmdArgs...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Env = append(cmd.Env, cmdEnvs...)
+
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+
 	return cmd
 }
 
-// kill one process
 func kill(cmd *exec.Cmd) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -39,41 +42,59 @@ func kill(cmd *exec.Cmd) {
 		}
 	}()
 
-	if cmd != nil && cmd.Process != nil {
-		if err := cmd.Process.Kill(); err != nil {
-			panic(err)
-		}
+	if cmd == nil || cmd.Process == nil {
+		return
 	}
-	return
+
+	if exited := <-exitC; exited {
+		return
+	}
+
+	pgid, err := syscall.Getpgid(cmd.Process.Pid)
+	if err == nil {
+		syscall.Kill(-pgid, syscall.SIGKILL)
+		log.Infof("kill process success, %d", cmd.Process.Pid)
+		return
+	}
+	panic(err)
 }
 
-// run a command
 func start(cmd *exec.Cmd) {
-	log.Info("Command Calling")
-	go cmd.Run()
+	cmd.Run()
+	log.Infof("Command calling end: %s\n", cmd.ProcessState.String())
+	exitC <- true
 }
 
 // final command will be like: "gowatch run ls -l"
 // cmdArgs format: "", cmdEnv format: "GOOS=linux"
 func InitDor(cmdName string, cmdArgs, cmdEnvs []string) {
-	// store
+	PATH := os.Getenv("path")
+	cmdEnvs = append(cmdEnvs, fmt.Sprintf("%s=%s", "PATH", PATH))
+
 	storeCmdArgs = cmdArgs
 	storeCmdEnvs = cmdEnvs
 	storeCmdName = cmdName
-	// may need valid args and env input
+
 	cmd = newCommand(cmdName, cmdArgs, cmdEnvs)
-	// init start cmd
-	start(cmd)
+	exitC = make(chan bool)
+	log.Info("Command calling, please wait...")
+	go start(cmd)
+	exitC <- false
 }
 
 // hotReload one command
 // if process has been killed, so renew one command
-// else reStart it
+// else restart it
 func hotReload() {
-	if !cmd.ProcessState.Exited() {
+	kill(cmd)
+	cmd = newCommand(storeCmdName, storeCmdArgs, storeCmdEnvs)
+	go start(cmd)
+	exitC <- false
+}
+
+// gowatch exit call this
+func Exit() {
+	if cmd.Process != nil && cmd.ProcessState != nil {
 		kill(cmd)
-	} else {
-		cmd = newCommand(storeCmdName, storeCmdArgs, storeCmdEnvs)
 	}
-	start(cmd)
 }
