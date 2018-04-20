@@ -1,25 +1,26 @@
-# gowatch
+# gw
 
-Go 程序热重载工具，提升开发效率
-
-通过监听当前目录下的相关文件变动，进行实时执行命令
+Golang编写的热重载工具，自定义命令，支持监视文件及路径配置，环境变量配置。这是一个重复的轮子～
 
 ### 安装使用
 
 ```go
-go get github.com/yeqown/gowatch 
-go install github.com/yeqown/gowatch
+git clone git@github.com:yeqown/gw.git
+cd path/to/gw && go build
+mv gw $GOPATH/bin
 ```
 
 ### 命令行
 
-`gowatch init`
+生成配置文件`gw init`
 
-`gowatch run [command] [...cmdArgs]`
+利用gw执行命令 `gw run [command] [...cmdArgs]`，如：
+	
+	gw run go run main.go -conf ./configs/config.yml
 
 ### 配置文件
 
-`gowatch init` // 初始化配置文件
+`gw init` // 初始化配置文件
 
 ```yml
 # gowatch.yml
@@ -36,14 +37,15 @@ exclude_regexps:
 # 热加载命令的环境变量
 envs:
   - GOOS=linux
-  - 
+  - GOPATH=/your/gopath
+  - GOROOT=/usr/local/go
 
-# 当前目录下需要排除的文件夹
+# 需要排除的文件夹，支持绝对路径和相对路径
 exclude_paths:
-  - vendor
-  - testdata
-  # - abspath also ok
+  - ./vendor
+  - ./testdata
+  # - abspath is also ok
 
 ```
 
->Forked and rewrite from [gowatch](https://github.com/silenceper/gowatch)
+> Forked and rewrite from [gowatch](https://github.com/silenceper/gowatch)
