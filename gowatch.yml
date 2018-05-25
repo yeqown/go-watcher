@@ -1,9 +1,0 @@
-excluded_regexps:
-  - .gitignore$
-  - .yml$
-  - .txt$
-extern_paths:
-excluded_paths:
-  - vendor
-envs:
-  - DEMO=demo
