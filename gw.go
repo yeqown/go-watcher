@@ -12,70 +12,57 @@ import (
 	"syscall"
 	"time"
 
-	. "gw/_internal"
+	. "github.com/yeqown/gw/_internal"
 
 	"github.com/silenceper/log"
 )
 
 var (
-	exit               chan bool // exit channel
-	paths              []string  // watching paths
-	cmdArgs            []string  // cmd args
-	cmdName            string    // cmd name
-	SubCommandErr      error     // error sub command
-	CommandFormatError error     // error command format
-	cfgFile            string    // config file
+	exit    = make(chan bool) // exit channel
+	paths   []string          // watching paths
+	cmdArgs []string          // cmd args
+	cmdName string            // cmd name
+	cfgFile string            // config file
+
+	ErrSubCmd = errors.New("Command err")         // error sub command
+	ErrCmdFmt = errors.New("sub command invalid") // error command format
 )
 
 func init() {
-	exit = make(chan bool)
-	CommandFormatError = errors.New("Command err")
-	SubCommandErr = errors.New("sub command invalid")
-	initCommand()
+	flag.StringVar(&cfgFile, "gwconf", "gw.yml", "default -gwconf=./gw.yml") // command
+	flag.String("", "", "gw [run/init] [command] [args...]")                 // command
 }
 
-func initCommand() {
-	flag.StringVar(&cfgFile, "conf", "gowatch.yml", "default -conf=./gowatch.yml") // command
-	flag.String("", "", "gowatch [ run/init ] [command] [args...]")                // command
-}
-
+// parse command line to do related command
 func parseCommand() error {
 	flag.Parse()
 	args := flag.Args()
-	// valid args
 	if len(args) == 0 {
-		return SubCommandErr
+		return ErrSubCmd
 	}
 
-	// get subcommand
-	subCmd := args[0]
-
-	switch subCmd {
+	switch args[0] {
 	case "run":
 		if len(args) < 2 {
 			flag.Usage()
-			return CommandFormatError
+			return ErrCmdFmt
 		}
 		cmdName = args[1]
 		if len(args) >= 3 {
 			cmdArgs = args[2:]
 		}
 	case "init":
-		// 输出到文件之后，结束程序
-		log.Info("GoWactch Exit!")
-		OutputDefaultConf("./gowatch.yml")
+		OutputDefaultConf("./gw.yml")
+		log.Info("gw Exit!")
 		os.Exit(2)
 	default:
 		flag.Usage()
-		return SubCommandErr
+		return ErrSubCmd
 	}
-
 	return nil
 }
 
-/*
- * gowatch
- */
+// the only entry
 func main() {
 	if parseCommand() != nil {
 		return
@@ -85,6 +72,7 @@ func main() {
 	if err != nil {
 		return
 	}
+
 	// parse config
 	ParseConfig(cfgFile)
 	cfg := GetInstance()
@@ -97,40 +85,35 @@ func main() {
 	AppendUnWatchRegexps(cfg.ExcludedRegexps...)
 	StartWatch(w, paths, exit)
 
+	log.Info("init dor")
 	// set dor
 	InitDor(cmdName, cmdArgs, cfg.Envs)
 
 	// handle os signal
-	go HdlSignal()
+	go func() {
+		sig := make(chan os.Signal)
+		signal.Notify(sig, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGHUP)
+		for {
+			s := <-sig
+			switch s {
+			case syscall.SIGINT:
+				close(exit)
+			case syscall.SIGQUIT:
+				close(exit)
+			case syscall.SIGHUP:
+			}
+			time.Sleep(1 * time.Second)
+		}
+	}()
 
 	// main concurency keep going
 	for {
 		select {
 		case <-exit:
-			log.Info("GoWactch Exit!")
+			log.Info("gw Exit!")
 			Exit()
 			os.Exit(2)
 		}
 		time.Sleep(3 * time.Second)
-	}
-}
-
-// handle os signal
-func HdlSignal() {
-	sig := make(chan os.Signal)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGHUP)
-
-	for {
-		s := <-sig
-
-		switch s {
-		case syscall.SIGINT:
-			close(exit)
-		case syscall.SIGQUIT:
-			close(exit)
-		case syscall.SIGHUP:
-		}
-
-		time.Sleep(1 * time.Second)
 	}
 }

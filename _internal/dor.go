@@ -7,10 +7,10 @@ package _internal
 import (
 	"github.com/silenceper/log"
 
-	"fmt"
 	"os"
 	"os/exec"
 	"syscall"
+	// "fmt"
 	// "time"
 )
 
@@ -49,7 +49,8 @@ func kill(cmd *exec.Cmd) {
 	if exited := <-exitC; exited {
 		return
 	}
-
+	// resolved cannot kill all command by following:
+	// syscall.Kill(-pgid, syscall.SIGKILL)
 	pgid, err := syscall.Getpgid(cmd.Process.Pid)
 	if err == nil {
 		syscall.Kill(-pgid, syscall.SIGKILL)
@@ -68,8 +69,9 @@ func start(cmd *exec.Cmd) {
 // final command will be like: "gowatch run ls -l"
 // cmdArgs format: "", cmdEnv format: "GOOS=linux"
 func InitDor(cmdName string, cmdArgs, cmdEnvs []string) {
-	PATH := os.Getenv("path")
-	cmdEnvs = append(cmdEnvs, fmt.Sprintf("%s=%s", "PATH", PATH))
+	// PATH := os.Getenv("PATH")
+	// log.Info(PATH)
+	cmdEnvs = append(cmdEnvs, syscall.Environ()...)
 
 	storeCmdArgs = cmdArgs
 	storeCmdEnvs = cmdEnvs

@@ -8,15 +8,20 @@ import (
 )
 
 type Config struct {
-	ExcludedRegexps []string `yaml:"excluded_regexps"` //需要追加监听的文件后缀名字，默认是'.go'，
-	ExternPaths     []string `yaml:"extern_paths"`
-	ExcludedPaths   []string `yaml:"excluded_paths"` //不需要监听的目录
-	Envs            []string `yaml:"envs"`           //执行时追加的环境变量
+	ExcludedRegexps []string `yaml:"excluded_regexps"` // 需要追加监听的文件后缀名字，默认是'.go'，
+	ExternPaths     []string `yaml:"extern_paths"`     // 额外需要监听的路径
+	ExcludedPaths   []string `yaml:"excluded_paths"`   // 不需要监听的目录
+	Envs            []string `yaml:"envs"`             // 执行时追加的环境变量
 }
 
 func (c *Config) String() string {
-	return fmt.Sprintf("Gowatch Config: \n\texcluded_regexps: %s\n\textern_paths: %s\n\texcluded_paths: %s\n\tenvs: %s\n",
-		c.ExcludedRegexps, c.ExternPaths, c.ExcludedPaths, c.Envs)
+	return fmt.Sprintf(
+		"gw config: \n\texcluded_regexps: %s\n\textern_paths: %s\n\texcluded_paths: %s\n\tenvs: %s\n",
+		c.ExcludedRegexps,
+		c.ExternPaths,
+		c.ExcludedPaths,
+		c.Envs,
+	)
 }
 
 var (
@@ -49,11 +54,10 @@ func OutputDefaultConf(outpath string) error {
 			".yml$",
 			".txt$",
 		},
-		ExternPaths: []string{
-			"/home/demo",
-		},
+		ExternPaths: []string{},
 		Envs: []string{
-			"DEMO=demo",
+			"GOROOT=/path/to/your/goroot",
+			"GOPATH=/path/to/your/gopath",
 		},
 		ExcludedPaths: []string{
 			"vendor",
