@@ -1,28 +1,44 @@
-# gw
+# go-watcher
 
 Golang编写的热重载工具，自定义命令，支持监视文件及路径配置，环境变量配置。这是一个重复的轮子～
 
 ### 安装使用
 
 ```go
-go get github.com/yeqown/gw
-go install github.com/yeqown/gw
+go install github.com/yeqown/go-watcher/cmd/go-watcher
 ```
 
 ### 命令行
+```
+NAME:
+   go-watcher - A new cli application
 
-生成配置文件`gw init`
+USAGE:
+   go-watcher [global options] command [command options] [arguments...]
 
-利用gw执行命令 `gw [-gwconf /path/to/gw.yml] run [command] [...cmdArgs]`，如：
-	
-	gw -gwconf ./gw.yml run go run main.go -conf ./configs/config.yml
+VERSION:
+   1.1.0
+
+AUTHOR:
+   yeqown@gmail.com
+
+COMMANDS:
+     init     complete a task on the list
+     run      execute a command, and watch the files, if any change to these files, the command will reload
+     help, h  Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --config FILE, -c FILE  load configuration from FILE, --default=./config.yml (default: "./config.yml")
+   --help, -h              show help
+   --version, -v           print the version
+```
 
 ### 配置文件
 
-`gw init` // 初始化配置文件
+`go-watcher init` // 初始化配置文件
 
 ```yml
-# gw.yml
+# go-watcher.yml
 
 # 需要监听的除当前目录以外的目录
 extern_paths:
@@ -46,5 +62,3 @@ exclude_paths:
   # - abspath is also ok
 
 ```
-
-> Forked and rewrite from [gowatch](https://github.com/silenceper/gowatch)
