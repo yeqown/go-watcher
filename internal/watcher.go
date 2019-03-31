@@ -1,7 +1,8 @@
 package internal
 
 /*
- * file watcher
+ * define a watcher to watch folders and files,
+ * if there's any change the command will reload.
  */
 
 import (
@@ -16,15 +17,16 @@ import (
 
 // Watcher ... to watch and run command
 type Watcher struct {
-	*fsnotify.Watcher
-	exit              chan<- bool
-	d                 time.Duration
-	cmd               *command.Command
-	watchingPaths     []string
-	watchingFiletype  []string
-	unWatchingRegular []string
+	fsWatcher *fsnotify.Watcher // *fsnotify.Watcher the actual file-wacher
+	exit      chan<- bool       // exit channel to watcher notify main goroutine quit
+	d         time.Duration     // watch duration
+	cmd       *command.Command  // command to reload
 
-	evtTime map[string]int64
+	watchingPaths     []string // paths those are wanted to be watched
+	watchingFiletype  []string // filetyps those are wanted to be watched
+	unWatchingRegular []string // regular expressions those are not wanted to be watched
+
+	evtTime map[string]int64 // record watching files modified time
 }
 
 // NewWatcher ...
@@ -35,7 +37,7 @@ func NewWatcher(paths []string, exit chan<- bool, watchingFiletype, unWatchingRe
 	}
 
 	watcher := &Watcher{
-		Watcher:           w,
+		fsWatcher:         w,
 		watchingPaths:     paths,
 		exit:              exit,
 		d:                 1 * time.Second,
@@ -59,12 +61,16 @@ func (w *Watcher) SetCommand(cmdName string, cmdArgs, envs []string) {
 	w.cmd.Start()
 }
 
-// Watching ...
+// Watching ... before watching, must call `SetCommand` at first
 func (w *Watcher) Watching() {
+	if w.cmd == nil {
+		panic("call watcher.SetCommand at first")
+	}
+
 	go func() {
 		for {
 			select {
-			case evt := <-w.Event:
+			case evt := <-w.fsWatcher.Event:
 				if utils.CheckFileRegexpExcluded(evt.Name, w.unWatchingRegular) {
 					log.Infof("skipped file [%s] cause: 'not in include regexp filetype'\n", evt.Name)
 					continue
@@ -90,7 +96,7 @@ func (w *Watcher) Watching() {
 
 				// hotReload
 				go w.cmd.HotReload()
-			case err := <-w.Error:
+			case err := <-w.fsWatcher.Error:
 				log.Warnf("%s", err.Error())
 				w.exit <- true
 			default:
@@ -101,7 +107,7 @@ func (w *Watcher) Watching() {
 
 	// append paths
 	for _, path := range w.watchingPaths {
-		if err := w.Watch(path); err != nil {
+		if err := w.fsWatcher.Watch(path); err != nil {
 			log.Errorf("failed to watch dir [%s]\n", path)
 			continue
 		}
@@ -111,5 +117,11 @@ func (w *Watcher) Watching() {
 
 // Exit ...
 func (w *Watcher) Exit() {
-	w.cmd.Exit()
+	if w.cmd != nil {
+		w.cmd.Exit()
+	}
+	if err := w.fsWatcher.Close(); err != nil {
+		panic(err)
+	}
+	// stop watching
 }

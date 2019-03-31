@@ -1,0 +1,10 @@
+excluded_regexps:
+- .gitignore$
+- .yml$
+- .txt$
+extern_paths: []
+excluded_paths:
+- vendor
+envs:
+- GOROOT=/path/to/your/goroot
+- GOPATH=/path/to/your/gopath

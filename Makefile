@@ -1,13 +1,27 @@
-default: clear build-osx build-linux
+default: clear compile-osx compile-linux archived
 
 test:
 	go test -v ./... -count=1
 
 clear:
-	echo "done"
+	rm -fr package
 
-build-osx:
-	go build -o bin/osx/go-watcher cmd/go-watcher/main.go
+compile-osx: version
+	go build -o package/osx/go-watcher cmd/go-watcher/main.go
+	
 
-build-linux:
-	GOOS=linux GOARCH=amd64 go build -o bin/linux/go-watcher cmd/go-watcher/main.go
+compile-linux: version
+	GOOS=linux GOARCH=amd64 go build -o package/linux/go-watcher cmd/go-watcher/main.go
+	
+
+archived:
+	- mkdir -p package/archived
+	tar -zcvf package/archived/go-watcher.osx.tar.gz package/osx
+	tar -zcvf package/archived/go-watcher.linux.tar.gz package/linux
+
+version:
+	- mkdir -p package/osx
+	- mkdir -p package/linux
+	echo "version" > VERSION
+	cp VERSION package/osx
+	cp VERSION package/linux

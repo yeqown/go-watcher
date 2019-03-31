@@ -10,7 +10,7 @@ go install github.com/yeqown/go-watcher/cmd/go-watcher
 
 ### 命令行
 ```
-NAME:
+NAME: P
    go-watcher - A new cli application
 
 USAGE:
