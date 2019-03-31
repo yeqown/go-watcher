@@ -1,4 +1,5 @@
 # go-watcher
+[![Go Report Card](https://goreportcard.com/badge/github.com/yeqown/go-watcher)](https://goreportcard.com/report/github.com/yeqown/go-watcher) [![GoReportCard](https://godoc.org/github.com/yeqown/go-watcher?status.svg)](https://godoc.org/github.com/yeqown/go-watcher)
 
 Golang编写的热重载工具，自定义命令，支持监视文件及路径配置，环境变量配置。这是一个重复的轮子～
 
