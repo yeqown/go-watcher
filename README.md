@@ -9,56 +9,117 @@ go install github.com/yeqown/go-watcher/cmd/go-watcher
 ```
 
 ### 命令行
-```
-NAME: P
+```sh
+➜  go-watcher git:(master) ✗ ./go-watcher -h   
+NAME:
    go-watcher - A new cli application
 
 USAGE:
    go-watcher [global options] command [command options] [arguments...]
 
 VERSION:
-   1.1.0
+   2.0.0
 
 AUTHOR:
    yeqown@gmail.com
 
 COMMANDS:
-     init     complete a task on the list
+     init     generate a config file to specified postion
      run      execute a command, and watch the files, if any change to these files, the command will reload
      help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --config FILE, -c FILE  load configuration from FILE, --default=./config.yml (default: "./config.yml")
-   --help, -h              show help
-   --version, -v           print the version
+   --help, -h     show help
+   --version, -v  print the version
 ```
 
 ### 配置文件
 
-`go-watcher init` // 初始化配置文件
-
 ```yml
-# go-watcher.yml
+watcher:                   # 监视器配置
+  duration: 2000           # 文件修改时间间隔，只有高于这个间隔才回触发重载
+  included_filetypes:      # 监视的文件扩展类型
+  - .go                    # 
+  excluded_regexps:        # 不被监视更改的文件正则表达式
+  - ^.gitignore$
+  - '*.yml$'
+  - '*.txt$'
+additional_paths: []       # 除了当前文件夹需要额外监视的文件夹
+excluded_paths:            # 不需要监视的文件名，若为相对路径，只能对于当前路径生效
+- vendor
+- .git
+envs:                      # 额外的环境变量
+- GOROOT=/path/to/your/goroot
+- GOPATH=/path/to/your/gopath
+```
 
-# 需要监听的除当前目录以外的目录
-extern_paths:
-  - $PATH/project/demo
+### 使用范例日志
 
-# 需要排除的文件表达式
-exclude_regexps:
-  - ".yml$"
-  - ".txt$"
+```sh
+➜  go-watcher git:(master) ✗ ./package/osx/go-watcher run -e "make" -c ./config.yml
+[INFO] directory (/Users/yeqown/Projects/opensource/go-watcher) is under watching
+[INFO] directory (/Users/yeqown/Projects/opensource/go-watcher/cmd) is under watching
+[INFO] directory (/Users/yeqown/Projects/opensource/go-watcher/cmd/go-watcher) is under watching
+[INFO] directory (/Users/yeqown/Projects/opensource/go-watcher/internal) is under watching
+[INFO] directory (/Users/yeqown/Projects/opensource/go-watcher/internal/command) is under watching
+[INFO] directory (/Users/yeqown/Projects/opensource/go-watcher/internal/log) is under watching
+[INFO] directory (/Users/yeqown/Projects/opensource/go-watcher/internal/testdata) is under watching
+[INFO] directory (/Users/yeqown/Projects/opensource/go-watcher/internal/testdata/exclude) is under watching
+[INFO] directory (/Users/yeqown/Projects/opensource/go-watcher/internal/testdata/testdata_inner) is under watching
+[INFO] directory (/Users/yeqown/Projects/opensource/go-watcher/package) is under watching
+[INFO] directory (/Users/yeqown/Projects/opensource/go-watcher/package/archived) is under watching
+[INFO] directory (/Users/yeqown/Projects/opensource/go-watcher/package/linux) is under watching
+[INFO] directory (/Users/yeqown/Projects/opensource/go-watcher/package/osx) is under watching
+[INFO] directory (/Users/yeqown/Projects/opensource/go-watcher/resources) is under watching
+[INFO] directory (/Users/yeqown/Projects/opensource/go-watcher/utils) is under watching
+[INFO] directory (/Users/yeqown/Projects/opensource/go-watcher/utils/testdata) is under watching
+[INFO] directory (/Users/yeqown/Projects/opensource/go-watcher/utils/testdata/testdata_inner) is under watching
+rm -fr package
+go build -o package/osx/go-watcher cmd/go-watcher/main.go
+GOOS=linux GOARCH=amd64 go build -o package/linux/go-watcher cmd/go-watcher/main.go
+mkdir -p package/archived
+tar -zcvf package/archived/go-watcher.osx.tar.gz package/osx
+a package/osx
+a package/osx/go-watcher
+tar -zcvf package/archived/go-watcher.linux.tar.gz package/linux
+a package/linux
+a package/linux/go-watcher
+[INFO] command executed done!
+[INFO] (/Users/yeqown/Projects/opensource/go-watcher/package/osx/go-watcher) is skipped, not target filetype
+[INFO] (/Users/yeqown/Projects/opensource/go-watcher/package/osx) is skipped, not target filetype
+[INFO] (/Users/yeqown/Projects/opensource/go-watcher/package) is skipped, not target filetype
+[INFO] (/Users/yeqown/Projects/opensource/go-watcher/package/linux/go-watcher) is skipped, not target filetype
+[INFO] (/Users/yeqown/Projects/opensource/go-watcher/package/linux) is skipped, not target filetype
+[INFO] (/Users/yeqown/Projects/opensource/go-watcher/package/archived/go-watcher.linux.tar.gz) is skipped, not target filetype
+[INFO] (/Users/yeqown/Projects/opensource/go-watcher/package/archived) is skipped, not target filetype
+[INFO] (/Users/yeqown/Projects/opensource/go-watcher/VERSION) is skipped, not target filetype
+[INFO] [/Users/yeqown/Projects/opensource/go-watcher/cmd/go-watcher/main.go] changed
+rm -fr package
+mkdir -p package/osx
+mkdir -p package/linux
+echo "2.0.0" > VERSION
+cp VERSION package/osx
+cp VERSION package/linux
+go build -o package/osx/go-watcher cmd/go-watcher/main.go
+GOOS=linux GOARCH=amd64 go build -o package/linux/go-watcher cmd/go-watcher/main.go
+mkdir -p package/archived
+tar -zcvf package/archived/go-watcher.osx.tar.gz package/osx
+a package/osx
+a package/osx/go-watcher
+a package/osx/VERSION
+tar -zcvf package/archived/go-watcher.linux.tar.gz package/linux
+a package/linux
+a package/linux/go-watcher[INFO] (/Users/yeqown/Projects/opensource/go-watcher/package/osx) is skipped, not target filetype
+[INFO] (/Users/yeqown/Projects/opensource/go-watcher/package/linux) is skipped, not target filetype
 
-# 热加载命令的环境变量
-envs:
-  - GOOS=linux
-  - GOPATH=/your/gopath
-  - GOROOT=/usr/local/go
-
-# 需要排除的文件夹，支持绝对路径和相对路径, 默认添加了当前系统用户的所有环境变量
-exclude_paths:
-  - ./vendor
-  - ./testdata
-  # - abspath is also ok
-
+a package/linux/VERSION
+[INFO] command executed done!
+[INFO] (/Users/yeqown/Projects/opensource/go-watcher/package/osx) is skipped, not target filetype
+[INFO] (/Users/yeqown/Projects/opensource/go-watcher/package/archived) is skipped, not target filetype
+[INFO] (/Users/yeqown/Projects/opensource/go-watcher/package) is skipped, not target filetype
+[INFO] (/Users/yeqown/Projects/opensource/go-watcher/VERSION) is skipped, not target filetype
+[INFO] (/Users/yeqown/Projects/opensource/go-watcher/package) is skipped, not target filetype
+^C[INFO] quit signal captured!
+[INFO] go-watcher exited
+➜  go-watcher git:(master) ✗ 
 ```

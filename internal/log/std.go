@@ -90,15 +90,15 @@ func (l *stdlogger) output(level Level, s string) {
 	formatStr := "[UNKNOWN] %s"
 	switch level {
 	case LevelFatal:
-		formatStr = "\033[35m[FATAL]\033[0m %s"
+		formatStr = "\033[35m[FATAL]\033[0m %s\n"
 	case LevelError:
-		formatStr = "\033[31m[ERROR]\033[0m %s"
+		formatStr = "\033[31m[ERROR]\033[0m %s\n"
 	case LevelWarning:
-		formatStr = "\033[33m[WARN]\033[0m %s"
+		formatStr = "\033[33m[WARN]\033[0m %s\n"
 	case LevelInfo:
-		formatStr = "\033[32m[INFO]\033[0m %s"
+		formatStr = "\033[32m[INFO]\033[0m %s\n"
 	case LevelDebug:
-		formatStr = "\033[36m[DEBUG]\033[0m %s"
+		formatStr = "\033[36m[DEBUG]\033[0m %s\n"
 	}
 	fmt.Printf(formatStr, s)
 }

@@ -93,11 +93,11 @@ func (w *Watcher) Watching() {
 
 				// skip un-target file event
 				if !w.filetypeIncludeChecker.Include(evt.Name, filetypeIncludeJudge) {
-					log.Infof("(%s) is skipped, not target filetype\n", evt.Name)
+					log.Infof("(%s) is skipped, not target filetype", evt.Name)
 					continue
 				}
 				if w.regularExcludeChecker.Exclude(evt.Name, regularExcludeJudge) {
-					log.Infof("(%s) is skipped, not target file\n", evt.Name)
+					log.Infof("(%s) is skipped, not target file", evt.Name)
 					continue
 				}
 
@@ -119,10 +119,10 @@ func (w *Watcher) Watching() {
 	// append paths
 	for _, path := range w.watchingPaths {
 		if err := w.fsWatcher.Watch(path); err != nil {
-			log.Errorf("failed to watch dir (%s)\n", path)
+			log.Errorf("failed to watch dir (%s)", path)
 			continue
 		}
-		log.Infof("directory (%s) is under watching\n", path)
+		log.Infof("directory (%s) is under watching", path)
 	}
 }
 

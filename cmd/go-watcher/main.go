@@ -18,11 +18,10 @@ import (
 )
 
 var (
-	exit       chan bool
-	paths      []string
+	exit       chan bool         // exit channel for main and watcher
+	paths      []string          // paths to watch
 	watcher    *internal.Watcher // watcher to watch changed and reload command
 	terminated bool              // to control main-goroutine keep running or not
-	// cfg            *Config
 )
 
 func init() {
@@ -34,7 +33,7 @@ func initCommand() *cli.App {
 	app := cli.NewApp()
 
 	app.Name = "go-watcher"
-	app.Version = "1.1.0"
+	app.Version = "2.0.1"
 	app.Author = "yeqown@gmail.com"
 	app.Flags = []cli.Flag{}
 
@@ -54,7 +53,7 @@ func initCommand() *cli.App {
 				if err := generateDefaultConfigFile(c.String("output")); err != nil {
 					return err
 				}
-				log.Infof("generate config file done!")
+				log.Info("generate config file done!")
 				return nil
 			},
 		},

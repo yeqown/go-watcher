@@ -1,4 +1,4 @@
-versionCode=1.1.0
+versionCode=2.0.1
 
 default: clear compile-osx compile-linux archived
 
@@ -24,6 +24,6 @@ archived:
 version:
 	- mkdir -p package/osx
 	- mkdir -p package/linux
-	echo ${versionCode} > VERSION
+	echo "${versionCode}" > VERSION
 	cp VERSION package/osx
 	cp VERSION package/linux

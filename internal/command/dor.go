@@ -42,7 +42,7 @@ func (c *Command) Start() {
 	go func() {
 		c.exeCmd.Run()
 		// state is: %s\n", c.exeCmd.ProcessState.String()
-		log.Infof("command executed done!")
+		log.Info("command executed done!")
 		c.exited = true
 	}()
 }
