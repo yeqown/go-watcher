@@ -10,10 +10,9 @@ import (
 	"time"
 
 	"github.com/yeqown/go-watcher/internal"
+	"github.com/yeqown/go-watcher/internal/log"
 	"github.com/yeqown/go-watcher/utils"
 
-	// TODO: replace log without time and file
-	"github.com/silenceper/log"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v1"
 )
@@ -52,7 +51,11 @@ func initCommand() *cli.App {
 			},
 			Action: func(c *cli.Context) error {
 				terminated = true
-				return generateDefaultConfigFile(c.String("output"))
+				if err := generateDefaultConfigFile(c.String("output")); err != nil {
+					return err
+				}
+				log.Infof("generate config file done!")
+				return nil
 			},
 		},
 		{
@@ -85,16 +88,21 @@ func initCommand() *cli.App {
 					return err
 				}
 
+				// start scan all folders and sub-folders for providing to watcher
 				pwd, _ := os.Getwd()
+				walker := internal.NewFolderWalker(pwd, cfg.AdditionalPaths, cfg.ExcludedPaths)
+				walker.Walk()
+
 				// passing config
-				paths = append(paths, cfg.additionalPaths...)
-				utils.WalkDirectory(pwd, cfg.excludedPaths, &paths, true)
+				// paths = append(paths, cfg.additionalPaths...)
+				// utils.WalkDirectory(pwd, cfg.excludedPaths, &paths, true)
+
 				if watcher, err = internal.
-					NewWatcher(paths, exit, []string{"go"}, cfg.excludedRegexps); err != nil {
+					NewWatcher(walker.Result(), exit, cfg.WatcherOpt); err != nil {
 					return err
 				}
 				parsed := strings.Split(c.String("command"), " ")
-				watcher.SetCommand(parsed[0], parsed[1:], cfg.envs)
+				watcher.SetCommand(parsed[0], parsed[1:], cfg.Envs)
 				go watcher.Watching() // start watching
 
 				return nil
@@ -123,7 +131,7 @@ func main() {
 		for s := range sigC {
 			switch s {
 			case syscall.SIGINT, syscall.SIGQUIT, syscall.SIGHUP:
-				log.Info("sig captured")
+				log.Info("quit signal captured!")
 				exit <- true
 				break
 			default:
@@ -140,28 +148,30 @@ func main() {
 			close(exit)
 			os.Exit(2)
 		default:
-			time.Sleep(3 * time.Second)
-			// log.Info("main looping")
+			time.Sleep(1 * time.Second)
 		}
 	}
 }
 
 // config of go-watcher
 type config struct {
-	excludedRegexps []string `yaml:"excluded_regexps"` // 需要追加监听的文件后缀名字，默认是'.go'，
-	additionalPaths []string `yaml:"extern_paths"`     // 额外需要监听的路径
-	excludedPaths   []string `yaml:"excluded_paths"`   // 不需要监听的目录
-	envs            []string `yaml:"envs"`             // 执行时追加的环境变量
+	WatcherOpt      *internal.WatcherOption `yaml:"watcher"`
+	AdditionalPaths []string                `yaml:"additional_paths"` // 额外需要监听的路径
+	ExcludedPaths   []string                `yaml:"excluded_paths"`   // 不需要监听的目录
+	Envs            []string                `yaml:"envs"`             // 执行时追加的环境变量
 }
 
 func (c *config) String() string {
-	return fmt.Sprintf(
-		"go-watcher config: \n\texcluded_regexps: %s\n\textern_paths: %s\n\texcluded_paths: %s\n\tenvs: %s\n",
-		c.excludedRegexps,
-		c.additionalPaths,
-		c.excludedPaths,
-		c.envs,
-	)
+	// return fmt.Sprintf(
+	// 	`go-swatcher's config is:
+	// 		watcher: %v\n
+	// 		additional paths: %v\n,
+	// 		exclude paths: %v\n
+	// 		envs: %v\n
+	// 	`,
+	// 	c.WatcherOpt, c.AdditionalPaths, c.ExcludedPaths, c.Envs)
+	bs, _ := yaml.Marshal(c)
+	return string(bs)
 }
 
 // loadConfigFile ...
@@ -178,21 +188,26 @@ func loadConfigFile(filename string) (cfg *config, err error) {
 // generateDefaultConfigFile ...
 func generateDefaultConfigFile(outpath string) error {
 	c := &config{
-		excludedRegexps: []string{
-			".gitignore$",
-			".yml$",
-			".txt$",
+		WatcherOpt: &internal.WatcherOption{
+			D: 2000,
+			ExcludedRegexps: []string{
+				"^.gitignore$",
+				"*.yml$",
+				"*.txt$",
+			},
+			IncludedFiletypes: []string{
+				".go",
+			},
 		},
-		additionalPaths: []string{},
-		envs: []string{
+		AdditionalPaths: []string{},
+		ExcludedPaths: []string{
+			"vendor", ".git",
+		},
+		Envs: []string{
 			"GOROOT=/path/to/your/goroot",
 			"GOPATH=/path/to/your/gopath",
 		},
-		excludedPaths: []string{
-			"vendor",
-		},
 	}
-
 	bs, _ := yaml.Marshal(c)
 	if err := ioutil.WriteFile(outpath, bs, 0644); err != nil {
 		return err

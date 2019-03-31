@@ -1,3 +1,5 @@
+versionCode=1.1.0
+
 default: clear compile-osx compile-linux archived
 
 test:
@@ -22,6 +24,6 @@ archived:
 version:
 	- mkdir -p package/osx
 	- mkdir -p package/linux
-	echo "version" > VERSION
+	echo ${versionCode} > VERSION
 	cp VERSION package/osx
 	cp VERSION package/linux

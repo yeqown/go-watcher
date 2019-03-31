@@ -10,10 +10,10 @@ import (
 	"os/exec"
 	"syscall"
 
-	"github.com/silenceper/log"
+	"github.com/yeqown/go-watcher/internal/log"
 )
 
-// Command ...
+// Command ... contains command context of 'name', 'args', and 'envs'
 type Command struct {
 	exeCmd                     *exec.Cmd // default cmd varible
 	exited                     bool
@@ -34,17 +34,15 @@ func New(name string, args, envs []string) *Command {
 		exited:       false,
 	}
 	command.exeCmd = newExeCommand(name, args, envs)
-	// log.Info("Command calling, please wait...")
-	// go command.Start()
-	// command.exit <- false
 	return command
 }
 
-// Start ...
+// Start ... execute the command
 func (c *Command) Start() {
 	go func() {
 		c.exeCmd.Run()
-		log.Infof("Command calling end: %s\n", c.exeCmd.ProcessState.String())
+		// state is: %s\n", c.exeCmd.ProcessState.String()
+		log.Infof("command executed done!")
 		c.exited = true
 	}()
 }
@@ -63,7 +61,7 @@ func (c *Command) quit() {
 	if c.exited {
 		return
 	}
-	// resolved cannot kill all command by following:
+	// [resolved] TOFIX: cannot kill all command by following:
 	// syscall.Kill(-pgid, syscall.SIGKILL)
 	pgid, err := syscall.Getpgid(c.exeCmd.Process.Pid)
 	if err == nil {
@@ -97,69 +95,3 @@ func newExeCommand(name string, args, envs []string) *exec.Cmd {
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	return cmd
 }
-
-// func kill(cmd *exec.Cmd) {
-// 	defer func() {
-// 		if err := recover(); err != nil {
-// 			log.Errorf("%s", err)
-// 		}
-// 	}()
-
-// 	if cmd == nil || cmd.Process == nil {
-// 		return
-// 	}
-
-// 	if exited := <-exitC; exited {
-// 		return
-// 	}
-// 	// resolved cannot kill all command by following:
-// 	// syscall.Kill(-pgid, syscall.SIGKILL)
-// 	pgid, err := syscall.Getpgid(cmd.Process.Pid)
-// 	if err == nil {
-// 		syscall.Kill(-pgid, syscall.SIGKILL)
-// 		log.Infof("kill process success, %d", cmd.Process.Pid)
-// 		return
-// 	}
-// 	panic(err)
-// }
-
-// func start(cmd *exec.Cmd) {
-// 	cmd.Run()
-// 	log.Infof("Command calling end: %s\n", cmd.ProcessState.String())
-// 	exitC <- true
-// }
-
-// // InitDor final command will be like: "gowatch run ls -l"
-// // cmdArgs format: "", cmdEnv format: "GOOS=linux"
-// func InitDor(cmdName string, cmdArgs, cmdEnvs []string) {
-// 	// PATH := os.Getenv("PATH")
-// 	// log.Info(PATH)
-// 	cmdEnvs = append(cmdEnvs, syscall.Environ()...)
-
-// 	storeCmdArgs = cmdArgs
-// 	storeCmdEnvs = cmdEnvs
-// 	storeCmdName = cmdName
-
-// 	cmd = newExeCommand(cmdName, cmdArgs, cmdEnvs)
-// 	exitC = make(chan bool)
-// 	log.Info("Command calling, please wait...")
-// 	go start(cmd)
-// 	exitC <- false
-// }
-
-// // hotReload one command
-// // if process has been killed, so renew one command
-// // else restart it
-// func hotReload() {
-// 	kill(cmd)
-// 	cmd = newExeCommand(storeCmdName, storeCmdArgs, storeCmdEnvs)
-// 	go start(cmd)
-// 	exitC <- false
-// }
-
-// // Exit gowatch exit call this
-// func Exit() {
-// 	if cmd.Process != nil && cmd.ProcessState != nil {
-// 		kill(cmd)
-// 	}
-// }

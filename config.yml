@@ -1,0 +1,15 @@
+watcher:
+  duration: 2000
+  included_filetypes:
+  - .go
+  excluded_regexps:
+  - ^.gitignore$
+  - '*.yml$'
+  - '*.txt$'
+additional_paths: []
+excluded_paths:
+- vendor
+- .git
+envs:
+- GOROOT=/path/to/your/goroot
+- GOPATH=/path/to/your/gopath
