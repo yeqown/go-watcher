@@ -1,0 +1,3 @@
+[submodule "go-watcher-homebrew"]
+	path = homebrew
+	url = git@github.com:yeqown/homebrew-go-watcher.git
