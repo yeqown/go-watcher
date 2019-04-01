@@ -9,6 +9,13 @@ Golang编写的热重载工具，自定义命令，支持监视文件及路径�
 go install github.com/yeqown/go-watcher/cmd/go-watcher
 ```
 
+or
+
+```sh
+brew tab yeqown/go-watcher
+brew install go-watcher
+```
+
 ### 命令行
 ```sh
 ➜  go-watcher git:(master) ✗ ./go-watcher -h   
