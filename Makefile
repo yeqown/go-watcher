@@ -18,8 +18,8 @@ compile-linux: version
 
 archived:
 	- mkdir -p package/archived
-	tar -zcvf package/archived/go-watcher.osx.tar.gz package/osx
-	tar -zcvf package/archived/go-watcher.linux.tar.gz package/linux
+	cd package/osx && tar -zcvf ../archived/go-watcher.osx.tar.gz .
+	cd package/linux && tar -zcvf ../archived/go-watcher.linux.tar.gz .
 
 version:
 	- mkdir -p package/osx
