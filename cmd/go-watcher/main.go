@@ -125,7 +125,9 @@ func main() {
 	}
 
 	sigC := make(chan os.Signal)
-	signal.Notify(sigC, syscall.SIGKILL, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGHUP)
+	// https://github.com/yeqown/go-watcher/issues/1: SIGKILL / SIGSTOP cannot be stopped
+	// http://man7.org/linux/man-pages/man7/signal.7.html
+	signal.Notify(sigC, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGHUP)
 	go func() {
 		for s := range sigC {
 			switch s {
